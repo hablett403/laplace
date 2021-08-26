@@ -1,3 +1,7 @@
+import numpy as np
+import scipy as scipy
+
+
 def laplace_solver_cartesian3d(bc_array, x, y, z):
     '''
     Solve the (scalar) Laplace equation in Cartesian coordinates in 3 dimensions. 
