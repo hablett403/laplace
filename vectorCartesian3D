@@ -1,0 +1,48 @@
+def laplace_solver_cartesian3d(bc_array, x, y, z):
+    '''
+    Solve the (scalar) Laplace equation in Cartesian coordinates in 3 dimensions. 
+    
+    Call signature:
+    
+    laplace_solver_cartesian3d(bc_array, x, y, z)
+    
+    Arguments:
+    bc_array: 3D array containing boundary conditions on exterior point. If the interior points are non-zero, the
+              solution may not be correct
+    x, y, z: 1D coordinate arrays
+    
+    '''
+    h = x[1]-x[0]
+    h_prime = y[1] - y[0]
+    h_doubleprime = z[1]-z[0]
+    fraction = lambda h1, h2, h3: 1/(2/h1**2 + 2/h2**2 + 2/h3**2)
+    
+    u = bc_array
+    iteration = 0
+    while iteration < 1000:
+        iteration += 1
+        Au = u.copy()
+        Au = fraction(h, h_prime, h_doubleprime) * (
+                                                   1/h**2 * (np.roll(u, -1, 0) + np.roll(u, 1, 0)) 
+                                                 + 1/h_prime**2 * (np.roll(u, -1, 1) + np.roll(u, 1, 1))
+                                                 + 1/h_doubleprime**2 * (np.roll(u, -1, 2) + np.roll(u, 1, 2))
+                                                   )
+        u[1:-1, 1:-1, 1:-1] = Au[1:-1,1:-1, 1:-1]
+
+    return u
+    
+    
+def laplace_solver_cartesian_vec(x,y,z, bx, by, bz):
+    '''
+    Solve the vector form of the Laplace equation in Cartesian coordinates in 3 dimensions. 
+    call signature:
+    
+    laplace_solver_cartesian_vec(x,y,z, bx, by, bz)
+    
+    Arguments:
+    x, y, z: 1D coordinate arrays
+    bx, by, bz:  3D arrays containing boundary conditions on exterior points for each component.
+                 If the interior points are non-zero, the solution will not be correct
+    
+    '''
+    return laplace_solver_cartesian3d(bx,x,y,z), laplace_solver_cartesian3d(by,x,y,z), laplace_solver_cartesian3d(bz,x,y,z)
