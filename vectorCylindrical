@@ -1,0 +1,41 @@
+def laplace_solver_cylindrical_vec(r, theta, z, br, btheta, bz):
+    '''
+    Solve the vector form of the Laplace equation in cylindrical coordinates. 
+    call signature:
+    
+    laplace_solver_cylindrical_vec(r,theta,z, br, btheta, bz)
+    
+    Arguments:
+    r, theta, z: 1D coordinate arrays
+    br, btheta, bz:  3D arrays containing boundary conditions on exterior points for each component.
+                 If the interior points are non-zero, the solution will not be correct
+    
+    '''
+    theta_matrix, radius_matrix, z_matrix = np.meshgrid(theta, r,z)
+    u = bc_array
+    h = r[1]-r[0]
+    h_prime = theta[1]-theta[0]
+    h_doubleprime = z[1] - z[0]
+    fraction = lambda r, h, h_prime, h_doubleprime: 1/(2/h**2+2/(r**2*h_prime**2)+2/h_doubleprime**2+1/r**2)
+    
+    iteration = 0
+    while iteration < 200:
+        iteration += 1
+        R = br.copy()
+        Theta = btheta.copy()
+        R =  fraction(radius_matrix,h,h_prime, h_doubleprime) * (
+                                                                             (1/h**2+1/(2*h*radius_matrix))*(np.roll(R,-1,0)+np,roll(R,1,0))
+                                                                             +1/(radius_matrix**2*h_prime**2)*(np.roll(R,-1,1)+np.roll(R,1,1))
+                                                                             +1/h_doubleprime**2*(np.roll(R,-1,2)+np.roll(R,1,2))
+                                                                             -1/(h_prime*radius_matrix**2)*(np.roll(Theta,-1,1)+np.roll(Theta,1,1))
+                                                                                )
+        Theta =  fraction(radius_matrix,h,h_prime, h_doubleprime) * (
+                                                                             (1/h**2+1/(2*h*radius_matrix))*(np.roll(Theta,-1,0)+np,roll(Theta,1,0))
+                                                                             +1/(radius_matrix**2*h_prime**2)*(np.roll(Theta,-1,1)+np.roll(Theta,1,1))
+                                                                             +1/h_doubleprime**2*(np.roll(Theta,-1,2)+np.roll(Theta,1,2))
+                                                                             -1/(h_prime*radius_matrix**2)*(np.roll(R,-1,1)+np.roll(R,1,1))
+                                                                                )
+        br[1:-1,:,:] = R[1:-1,:,:]
+        btheta[:,1:-1,:] = Theta[:,1:-1,:]
+        
+    return R, Phi, laplace_solver_cylindrical(bz, r, theta, z)
