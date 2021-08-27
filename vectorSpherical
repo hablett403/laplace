@@ -1,0 +1,52 @@
+def laplace_solver_spherical_vec(r, theta, phi, br, btheta, bphi):
+    theta_matrix, radius_matrix, phi_matrix = np.meshgrid(theta, r, phi)
+    u = bc_array
+    h = r[1]-r[0]
+    h_prime = theta[1]-theta[0]
+    h_doubleprime = phi[1] - phi[0]
+    
+    fraction_r = lambda h, h_prime, h_doubleprime, r, theta: 1/(2*(h**-2+(h_prime*r)**-2
+                                                                  +(h_doubleprime*r+np.sin(theta))**-2+r**-2))
+    fraction_theta = lambda h, h_prime, h_doubleprime, r, theta: 1/(2*(h**-2+(h_prime*r)**-2
+                                                                    +(h_doubleprime*r*np.sin(theta))**-2)+1/(2*r**2*np.sin(theta)**2))
+    fraction_phi = fraction_theta
+    
+    multiplier = lambda h, h_prime, radius_matrix, theta_matrix, C: (1/(h*r)*(np.roll(C,-1,0)-np.roll(C,1,0))
+                                                                +1/h**2*(np.roll(C,-1,0)+np.roll(C,1,0))
+                                                                +(h_prime*radius_matrix)**-2*(np.roll(C,-1,1)+np.roll(C,1,1))
+                                                                +(h_doubleprime*radius_matrix)**-2*(np.roll(C,-1,2)+np.roll(C,1,2))
+                                                                +1/(2*h_prime*radius_matrix**2*np.tan(theta_matrix))*(np.roll(C,-1,1)+np.roll(C,1,1)))
+    #multiplier is simply the first five components of the expression in the derivation which come from $\nabla^2$ 
+    #of each component  - see derivation for details
+    
+    iteration = 0
+    while iteration <= 200:
+        iteration += 1
+        R = br.copy()
+        Theta = btheta.copy()
+        Phi = bphi.copy()
+    
+        R = fraction_r(h, h_prime, h_doubleprime, radius_matrix) * (
+                                                                multiplier(h, h_prime, radius_matrix, theta_matrix, R)
+                                                                -1/(h_prime*radius_matrix**2)*(np.roll(Theta,-1,1)-np.roll(Theta,1,1))
+                                                                -1/(h_doubleprime*r**2*np.sin(theta_matrix))*(np.roll(Phi,-1,1)-np.roll(Phi,1,1))
+                                                                -2/(radius_matrix**2*np.tan(theta_matrix))*Theta
+                                                                )
+        
+        Theta = fraction_theta(h, h_prime, h_doubleprime, radius_matrix) * (
+                                                                multiplier(h, h_prime, radius_matrix, theta_matrix, Theta)
+                                                                -1/(np.tan(theta_matrix)*h_doubleprime*r**2*np.sin(theta_matrix))*(np.roll(Phi,-1,2)-np.roll(Phi,1,2))
+                                                                +1/(r**2*h_prime)*(np.roll(R,-1,1)-np.roll(R,1,1))
+                                                                            )
+        
+        Phi = fraction_phi(h, h_prime, h_doubleprime, radius_matrix) *(
+                                                                multiplier(h, h_prime, radius_matrix, theta_matrix, Phi)
+                                                                -1/(h_doubleprime*r**2*np.sin(theta_matrix))*(np.roll(R,-1,2)-np.roll(R,1,2))
+                                                                +1/(np.tan(theta_matrix)*r**2*h_doubleprime*np.sin(theta_matrix))*(np.roll(Theta,-1,1)-np.roll(Theta,1,1))
+                                                                            )
+    
+        br[1:-1,:,:] = R[1:-1,:,:]
+        btheta[:,1:-1,:] = Theta[:,1:-1,:]
+        bphi[:,1:-1,:] = Phi[:,1:-1,:]
+        
+    return R, Theta, Phi
