@@ -1,17 +1,29 @@
 import numpy as np
 
-def poisson_solver_cartesian3d(bx_array, by_array, bz_array, x, y, z, hx, hy, hz):
+def poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz):
     '''
-    Solves $\nabla^2 u = h$. 
+    Solves the (vecctor) form of the Poisson equation in 3D Cartesian coordinates, $\nabla^2 u = h$, using finite differences. A full derivation 
+    can be found in the supporting PDF document.
+    
+    Call signature:
+    
+    poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz)
+    
+    Arguments:
+    bx, by, bz: 3D ndarrays containing boundary conditions on exterior points for each component.
+                If the interior points are non-zero, the solution may not be correct.
+    x, y, z:    1D coordinate arrays. These are only used to calculate grid spacing.
+    hx, hy, hz: 3D ndarrays representing the components of the known function h. 
     '''
-    h = x[1]-x[0]
+    
+    h = x[1] - x[0]
     h_prime = y[1] - y[0]
-    h_doubleprime = z[1]-z[0]
+    h_doubleprime = z[1] - z[0]
     fraction = lambda h1, h2, h3: 1/(2 * 1/(h1**2) + 2 * 1/(h2**2) + 2 * 1/(h3**2))
     
-    ux = bx_array
-    uy = by_array
-    uz = bz_array
+    ux = bx
+    uy = by
+    uz = bz
     iteration = 0
     while iteration < 1000:
         iteration += 1
