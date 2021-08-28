@@ -1,4 +1,51 @@
-def laplace_solver_spherical_vec(r, theta, phi, br, btheta, bphi):
+#contains functions to solve both the scalar and vector form of the Laplace equation in spherical coordinates.
+#See PDF for details of derivation of results.
+
+import numpy as np
+
+def laplace_spherical_scalar(bc, r, theta, phi):
+    '''
+    Solve the scalar form of Laplace equation in spherical coordinates using finite differences. 
+    See PDF for derivation.
+    
+    Call signature:
+    
+    laplace_spherical_scalar(bc, r, theta, phi)
+    
+    Arguments:
+    bc: 3D    ndarray containing boundary conditions on exterior point. If the interior points are non-zero, the
+              solution may not be correct. Top row corresponds to minimum radius, bottom row corresponds to maximum radius;
+              theta increases from left to right
+    r, theta, phi: coordinate arrays of r, theta and phi. In this formulation, theta ranges from 0 to pi, 
+                   phi ranges from 0 to 2pi.
+    '''
+    theta_matrix, radius_matrix, phi_matrix = np.meshgrid(theta, r, phi)
+    u = bc
+    h = r[1] - r[0]
+    h_prime = theta[1] - theta[0]
+    h_doubleprime = phi[1] - phi[0]
+    m = np.nan_to_num(
+                        1/ (2 * (1/h**2 + 1/(h_prime**2 * radius_matrix**2) 
+                                + 1/(h_doubleprime**2 * np.sin(theta_matrix)**2 * radius_matrix**2)))
+                        )
+    
+    iteration = 0
+    while iteration < 200:
+        iteration += 1
+        Au = u.copy()
+        Au =  m * (
+                    1/(h * radius_matrix) * (np.roll(u, -1, 0) - np.roll(u, 1, 0))
+                    + 1/h**2 * (np.roll(u, -1, 0) + np.roll(u, 1, 0))
+                    + np.nan_to_num(1/(2 * h_prime * r**2 * np.nan_to_num(np.tan(theta_matrix)))) * (np.roll(u, -1, 1) - np.roll(u, 1, 1)) 
+                    + 1/(r**2 * h_prime**2) * (np.roll(u, -1, 1) + np.roll(u, 1, 1))
+                    + np.nan_to_num(1/(r**2 * (np.sin(theta_matrix)))**2 * h_doubleprime**2) * (np.roll(u, 1, 2) + np.roll(u, -1, 2))
+                    )
+        u[1:-1,:,:] = Au[1:-1,:,:]
+        
+        
+    return u
+
+def laplace_spherical_vector(r, theta, phi, br, btheta, bphi):
     theta_matrix, radius_matrix, phi_matrix = np.meshgrid(theta, r, phi)
     u = bc_array
     h = r[1]-r[0]
