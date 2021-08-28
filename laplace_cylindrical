@@ -1,3 +1,5 @@
+#contains functions to solve both the scalar and vector form of the Laplace equation in cylindrical coordinates
+
 import numpy as np
 
 def laplace_cylindrical_scalar(bc, r, theta, z):
