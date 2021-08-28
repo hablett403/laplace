@@ -1,3 +1,6 @@
+#contains functions to solve both the vector form of the Poisson equation in Cartesian coordinates.
+#See PDF for details of derivation of results.
+
 import numpy as np
 
 def poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz):
