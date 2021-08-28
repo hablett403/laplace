@@ -1,0 +1,84 @@
+import numpy as np
+
+def laplace_cylindrical_scalar(bc, r, theta, z):
+    '''
+    Solve the scalar form of the Laplace equation in cylindical coordinates usiing finite differences. 
+    See PDF for derivation. 
+    
+    Call signature:
+    
+    laplace_cylindrical_scalar(bc, r, theta, z)
+    
+    Arguments:
+    bc: 3D ndarray containing boundary conditions on exterior points. If the interior points are non-zero, the
+        solution may not be correct. 0th index corresponds to minimum radius; theta increases from left to right.
+        
+    r, theta, z: 1D coordinate arrays of r, theta and z.
+    '''
+    theta_matrix, radius_matrix, z_matrix = np.meshgrid(theta, r, z)
+    u = bc_array
+    h = r[1]-r[0]
+    h_prime = theta[1]-theta[0]
+    h_doubleprime = z[1] - z[0]
+    m = 1/(2*(1/h**2+1/(h_prime**2 * radius_matrix**2)+1/h_doubleprime**2))
+    
+    iteration = 0
+    while iteration < 200:
+        iteration += 1
+        Au = u.copy()
+        Au =  m * (
+                    (1/h**2 + 1/(2 * h * radius_matrix)) * np.roll(u, -1, 0) 
+                    + (1/h**2 - 1/(2 * h * radius_matrix)) * np.roll(u, 1, 0) 
+                    + 1/(h_prime**2 * radius_matrix**2) * (np.roll(u, 1, 1) + np.roll(u, -1, 1))
+                    + 1/(h_doubleprime**2) * (np.roll(u, 1, 2) + np.roll(u, -1, 2))
+                    )
+        
+        u[1:L-1,:,:] = Au[1:L-1,:,:]
+        
+    return u
+
+def laplace_cylindrical_vector(br, btheta, bz, r, theta, z):
+    '''
+    Solve the vector form of the Laplace equation in cylindrical coordinates using finite diffferences.
+    
+    Call signature:
+    
+    laplace_cylindrical_vector(br, btheta, bz, r, theta, z)
+    
+    Arguments:
+    br, btheta, bz:  3D ndarrays containing boundary conditions on exterior points for each component. 
+                     If the interior points are non-zero, the solution may not be correct. See PDF for
+                     derivation.
+                       
+    r, theta, z: 1D coordinate arrays. 
+
+    
+    '''
+    theta_matrix, radius_matrix, z_matrix = np.meshgrid(theta, r,z)
+    h = r[1] - r[0]
+    h_prime = theta[1] - theta[0]
+    h_doubleprime = z[1] - z[0]
+    m = 1/(2/h**2 + 2/(radius_matrix**2 * h_prime**2) + 2/h_doubleprime**2 + 1/radius_matrix**2)
+    
+    iteration = 0
+    while iteration < 1000:
+        iteration += 1
+        R = br.copy()
+        Theta = btheta.copy()
+        R = m * (
+                  (1/h**2 + 1/(2 * h * radius_matrix)) * (np.roll(R, -1, 0) + np.roll(R, 1, 0))
+                  + 1/(radius_matrix**2 * h_prime**2) * (np.roll(R, -1, 1) + np.roll(R, 1, 1))
+                  + 1/h_doubleprime**2 * (np.roll(R, -1, 2) + np.roll(R, 1, 2))
+                  - 1/(h_prime * radius_matrix**2) * (np.roll(Theta, -1, 1) + np.roll(Theta, 1, 1))
+                )
+        Theta = m * (
+                      (1/h**2 + 1/(2 * h * radius_matrix)) * (np.roll(Theta, -1, 0) + np.roll(Theta, 1, 0))
+                      + 1/(radius_matrix**2 * h_prime**2) * (np.roll(Theta, -1, 1) + np.roll(Theta, 1, 1))
+                      + 1/h_doubleprime**2 * (np.roll(Theta, -1, 2) + np.roll(Theta, 1, 2))
+                      - 1/(h_prime * radius_matrix**2) * (np.roll(R, -1, 1) + np.roll(R, 1, 1))
+                    )
+        
+        br[1:-1,:,:] = R[1:-1,:,:]
+        btheta[:,1:-1,:] = Theta[:,1:-1,:]
+        
+    return R, Phi, laplace_solver_cylindrical(bz, r, theta, z)
