@@ -20,18 +20,18 @@ def laplace_cartesian_scalar(bc, x, y, z):
     h = x[1] - x[0]
     h_prime = y[1] - y[0]
     h_doubleprime = z[1] - z[0]
-    fraction = lambda h1, h2, h3: 1/(2/h1**2 + 2/h2**2 + 2/h3**2)
+    m = 1/(2/h**2 + 2/h_prime**2 + 2/h_doubleprime**2)
     
     u = bc
     iteration = 0
     while iteration < 1000:
         iteration += 1
         Au = u.copy()
-        Au = fraction(h, h_prime, h_doubleprime) * (
-                                                   1/h**2 * (np.roll(u, -1, 0) + np.roll(u, 1, 0)) 
-                                                 + 1/h_prime**2 * (np.roll(u, -1, 1) + np.roll(u, 1, 1))
-                                                 + 1/h_doubleprime**2 * (np.roll(u, -1, 2) + np.roll(u, 1, 2))
-                                                   )
+        Au = m * (
+                      1/h**2 * (np.roll(u, -1, 0) + np.roll(u, 1, 0)) 
+                    + 1/h_prime**2 * (np.roll(u, -1, 1) + np.roll(u, 1, 1))
+                    + 1/h_doubleprime**2 * (np.roll(u, -1, 2) + np.roll(u, 1, 2))
+                    )
         u[1:-1, 1:-1, 1:-1] = Au[1:-1,1:-1, 1:-1]
 
     return u
