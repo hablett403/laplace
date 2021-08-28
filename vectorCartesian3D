@@ -2,26 +2,27 @@ import numpy as np
 import scipy as scipy
 
 
-def laplace_solver_cartesian3d(bc_array, x, y, z):
+def laplace_cartesian_scalar(bc, x, y, z):
     '''
-    Solve the (scalar) Laplace equation in Cartesian coordinates in 3 dimensions. 
+    Solve the (scalar) Laplace equation in Cartesian coordinates in 3 dimensions using finite differences. A full derivation 
+    can be found in the supporting PDF document. 
     
     Call signature:
     
-    laplace_solver_cartesian3d(bc_array, x, y, z)
+    laplace_cartesian_scalar(bc, x, y, z)
     
     Arguments:
-    bc_array: 3D array containing boundary conditions on exterior point. If the interior points are non-zero, the
-              solution may not be correct
-    x, y, z: 1D coordinate arrays
+    bc: 3D ndarray containing boundary conditions on exterior point. If the interior points are non-zero, the
+        solution may not be correct.
+    x, y, z: 1D coordinate arrays. These are only used to calculate grid spacing. 
     
     '''
-    h = x[1]-x[0]
+    h = x[1] - x[0]
     h_prime = y[1] - y[0]
-    h_doubleprime = z[1]-z[0]
+    h_doubleprime = z[1] - z[0]
     fraction = lambda h1, h2, h3: 1/(2/h1**2 + 2/h2**2 + 2/h3**2)
     
-    u = bc_array
+    u = bc
     iteration = 0
     while iteration < 1000:
         iteration += 1
@@ -36,17 +37,22 @@ def laplace_solver_cartesian3d(bc_array, x, y, z):
     return u
     
     
-def laplace_solver_cartesian_vec(x,y,z, bx, by, bz):
+def laplace_cartesian_vector(bx, by, bz, x, y, z):
     '''
-    Solve the vector form of the Laplace equation in Cartesian coordinates in 3 dimensions. 
-    call signature:
+    Solve the vector form of the Laplace equation in Cartesian coordinates in 3 dimensions using finite differences. 
+    This function simply applies the scalar function to the three components. A full derivation 
+    can be found in the supporting PDF document.
     
-    laplace_solver_cartesian_vec(x,y,z, bx, by, bz)
+    Call signature:
+    
+    laplace_cartesian_vector(bx, by, bz, x, y, z)
     
     Arguments:
-    x, y, z: 1D coordinate arrays
-    bx, by, bz:  3D arrays containing boundary conditions on exterior points for each component.
-                 If the interior points are non-zero, the solution will not be correct
+    bx, by, bz:  3D ndarrays containing boundary conditions on exterior points for each component.
+                 If the interior points are non-zero, the solution may not be correct
+    x, y, z: 1D coordinate arrays. These are only used to calculate grid spacing.
+    
     
     '''
-    return laplace_solver_cartesian3d(bx,x,y,z), laplace_solver_cartesian3d(by,x,y,z), laplace_solver_cartesian3d(bz,x,y,z)
+    return (laplace_cartesian_scalar(bx, x, y, z), laplace_cartesian_scalar(by, x, y, z),
+            laplace_cartesian_scalar(bz, x, y, z))
