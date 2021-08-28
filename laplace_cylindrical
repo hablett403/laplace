@@ -1,4 +1,5 @@
 #contains functions to solve both the scalar and vector form of the Laplace equation in cylindrical coordinates
+#see PDF for derivation
 
 import numpy as np
 
