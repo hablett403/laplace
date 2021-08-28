@@ -84,4 +84,4 @@ def laplace_cylindrical_vector(br, btheta, bz, r, theta, z):
         br[1:-1,:,:] = R[1:-1,:,:]
         btheta[:,1:-1,:] = Theta[:,1:-1,:]
         
-    return R, Phi, laplace_solver_cylindrical(bz, r, theta, z)
+    return R, Phi, laplace_cylindrical_scalar(bz, r, theta, z)
