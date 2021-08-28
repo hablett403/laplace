@@ -2,7 +2,7 @@ import numpy as np
 
 def poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz):
     '''
-    Solves the (vecctor) form of the Poisson equation in 3D Cartesian coordinates, $\nabla^2 u = h$, using finite differences. A full derivation 
+    Solves the (vector) form of the Poisson equation in 3D Cartesian coordinates, $\nabla^2 u = h$, using finite differences. A full derivation 
     can be found in the supporting PDF document.
     
     Call signature:
@@ -19,7 +19,7 @@ def poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz):
     h = x[1] - x[0]
     h_prime = y[1] - y[0]
     h_doubleprime = z[1] - z[0]
-    fraction = lambda h1, h2, h3: 1/(2 * 1/(h1**2) + 2 * 1/(h2**2) + 2 * 1/(h3**2))
+    m = 1/(2 * 1/(h**2) + 2 * 1/(h_prime**2) + 2 * 1/(h_doubleprime**2))
     
     ux = bx
     uy = by
@@ -28,30 +28,30 @@ def poisson_cartesian_vector(bx, by, bz, x, y, z, hx, hy, hz):
     while iteration < 1000:
         iteration += 1
         Aux = ux.copy()
-        Aux = fraction(h, h_prime, h_doubleprime) * (
-                                                   1/h**2 * (np.roll(ux, -1, 0) + np.roll(ux, 1, 0)) 
-                                                 + 1/h_prime**2 * (np.roll(ux, -1, 1) + np.roll(ux, 1, 1))
-                                                 + 1/h_doubleprime**2 * (np.roll(ux, -1, 2) + np.roll(ux, 1, 2))
-                                                - hx
-                                                   )
+        Aux = m * (
+                    1/h**2 * (np.roll(ux, -1, 0) + np.roll(ux, 1, 0)) 
+                    + 1/h_prime**2 * (np.roll(ux, -1, 1) + np.roll(ux, 1, 1))
+                    + 1/h_doubleprime**2 * (np.roll(ux, -1, 2) + np.roll(ux, 1, 2))
+                    - hx
+                    )
         ux[1:-1, 1:-1, 1:-1] = Aux[1:-1,1:-1, 1:-1]
         
         Auy = uy.copy()
-        Auy = fraction(h, h_prime, h_doubleprime) * (
-                                                   1/h**2 * (np.roll(uy, -1, 0) + np.roll(uy, 1, 0)) 
-                                                 + 1/h_prime**2 * (np.roll(uy, -1, 1) + np.roll(uy, 1, 1))
-                                                 + 1/h_doubleprime**2 * (np.roll(uy, -1, 2) + np.roll(uy, 1, 2))
-                                                 -hy
-                                                   )
+        Auy = m * (
+                    1/h**2 * (np.roll(uy, -1, 0) + np.roll(uy, 1, 0)) 
+                    + 1/h_prime**2 * (np.roll(uy, -1, 1) + np.roll(uy, 1, 1))
+                    + 1/h_doubleprime**2 * (np.roll(uy, -1, 2) + np.roll(uy, 1, 2))
+                    -hy
+                    )
         uy[1:-1, 1:-1, 1:-1] = Auy[1:-1,1:-1, 1:-1]
         
         Auz = uz.copy()
-        Auz = fraction(h, h_prime, h_doubleprime) * (
-                                                   1/h**2 * (np.roll(uz, -1, 0) + np.roll(uz, 1, 0)) 
-                                                 + 1/h_prime**2 * (np.roll(uz, -1, 1) + np.roll(uz, 1, 1))
-                                                 + 1/h_doubleprime**2 * (np.roll(uz, -1, 2) + np.roll(uz, 1, 2))
-                                                 -hz
-                                                   )
+        Auz = m * (
+                    1/h**2 * (np.roll(uz, -1, 0) + np.roll(uz, 1, 0)) 
+                    + 1/h_prime**2 * (np.roll(uz, -1, 1) + np.roll(uz, 1, 1))
+                    + 1/h_doubleprime**2 * (np.roll(uz, -1, 2) + np.roll(uz, 1, 2))
+                    -hz
+                    )
         uz[1:-1, 1:-1, 1:-1] = Auz[1:-1,1:-1, 1:-1]
         
         
