@@ -1,3 +1,6 @@
+#contains functions to solve both the scalar and vector form of the Poisson equation in spherical coordinates.
+#See PDF for details of derivation of results.
+
 def poisson_spherical_vector(br, btheta, bphi, r, theta, phi, hr, htheta, hphi):
     '''
     Solve the vector form of the Poisson equation, $\nabla^2 u = h$, in spherical coordinates using finite differences.
