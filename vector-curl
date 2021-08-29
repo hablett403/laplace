@@ -1,0 +1,37 @@
+import numpy as np
+
+def curl(x,y,z,u,v,w):
+    '''
+    Function to calculate the curl of a vector field numerically.
+    
+    Arguments:
+    
+    x, y, z: 3D ndarrays representing coordinates
+    u, v, w: components of the vector field
+    
+    Example:
+    Let F = (-y, xy, z). Then curlF = (0, 0, y+1).
+    x = np.linspace(1,100)
+    y = x
+    z = x
+    xx, yy, zz = np.meshgrid(x,y,z)
+    def f(x,y,z):
+        return np.array([-y, x*y,z])
+
+    F = f(xx, yy, zz)
+    curl(xx,yy,zz,F[0], F[1], F[2])[2]
+    '''
+    
+    dx = x[0,:,0]
+    dy = y[:,0,0]
+    dz = z[0,0,:]
+
+    dummy, dFx_dy, dFx_dz = np.gradient (u, dx, dy, dz, axis=[1,0,2])
+    dFy_dx, dummy, dFy_dz = np.gradient (v, dx, dy, dz, axis=[1,0,2])
+    dFz_dx, dFz_dy, dummy = np.gradient (w, dx, dy, dz, axis=[1,0,2])
+
+    rot_x = dFz_dy - dFy_dz
+    rot_y = dFx_dz - dFz_dx
+    rot_z = dFy_dx - dFx_dy
+
+    return rot_x, rot_y, rot_z
